@@ -1,6 +1,18 @@
 Analyzing the NYC Traffic Death Data
 ================
 
+Why use GitHub and R?
+---------------------
+
+motivate the workshop
+
+describe GitHub, Docker, RStudio, and RProjects
+
+Philosophy of Version Control
+-----------------------------
+
+how to decide on when to commit, etc.
+
 Set RStudio up for GitHub
 -------------------------
 
@@ -78,7 +90,7 @@ df.traffic$timestamp <- strptime(paste(df.traffic$date," ",df.traffic$time), "%m
 
 df.traffic$date <- as.Date(df.traffic$date, format = "%m/%d/%Y")
 
-# load packages
+# load packages; note: on your own machine, you might just want to use the tidyverse package to install all at once
 
 library(dplyr)
 ```
@@ -127,3 +139,11 @@ ggplot(df.fulldate, aes(x=hour(timestamp), y=wday(timestamp, label=TRUE))) + geo
 ```
 
 ![](traffic-death-analysis_files/figure-markdown_github/hour_by_dayofweek-1.png)
+
+Resources
+---------
+
+-   <http://happygitwithr.com/>
+-   LearnR
+-   etc.
+-   analysis workflow cheat sheet - just a few simple commands, summary stats?

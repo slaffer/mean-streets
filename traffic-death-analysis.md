@@ -66,33 +66,64 @@ Note: you can only save files back to a repository you own. RStudio will create 
 8.  After the commit, you still have to "Push" or upload the files up to GitHub. Click the Push button, either in the Commit window or in the normal RStudio window.
 9.  When it asks you to log in, use the username and password of the account you used to fork (or create) the repository
 
-GitHub Documents
-----------------
-
-This is an R Markdown format used for publishing markdown documents to GitHub. When you click the **Knit** button all R code chunks are run and a markdown file (.md) suitable for publishing to GitHub is generated.
-
-Including Code
---------------
-
-You can include R code in the document as follows:
+Load the data
+-------------
 
 ``` r
-summary(cars)
+df.traffic <- read.csv('traffic-deaths.csv',stringsAsFactors = FALSE)
+
+# create continuous time variable
+
+df.traffic$timestamp <- strptime(paste(df.traffic$date," ",df.traffic$time), "%m/%d/%Y %I:%M %p")
+
+df.traffic$date <- as.Date(df.traffic$date, format = "%m/%d/%Y")
+
+# load packages
+
+library(dplyr)
 ```
 
-    ##      speed           dist       
-    ##  Min.   : 4.0   Min.   :  2.00  
-    ##  1st Qu.:12.0   1st Qu.: 26.00  
-    ##  Median :15.0   Median : 36.00  
-    ##  Mean   :15.4   Mean   : 42.98  
-    ##  3rd Qu.:19.0   3rd Qu.: 56.00  
-    ##  Max.   :25.0   Max.   :120.00
+    ## 
+    ## Attaching package: 'dplyr'
 
-Including Plots
----------------
+    ## The following object is masked from 'package:GGally':
+    ## 
+    ##     nasa
 
-You can also embed plots, for example:
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     filter, lag
 
-![](traffic-death-analysis_files/figure-markdown_github/pressure-1.png)
+    ## The following objects are masked from 'package:lubridate':
+    ## 
+    ##     intersect, setdiff, union
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
+
+``` r
+library(tidyr)
+library(ggplot2)
+library(lubridate)
+
+df.fulldate <- subset(df.traffic, !is.na(timestamp))
+```
+
+``` r
+ggplot(df.fulldate, aes(x=month(timestamp, label=TRUE))) + geom_bar()
+```
+
+![](traffic-death-analysis_files/figure-markdown_github/accidents_by_month-1.png)
+
+``` r
+ggplot(df.fulldate, aes(x=week(timestamp), y=hour(timestamp))) + geom_bin2d(binwidth=1)
+```
+
+![](traffic-death-analysis_files/figure-markdown_github/week_by_hour-1.png)
+
+``` r
+ggplot(df.fulldate, aes(x=hour(timestamp), y=wday(timestamp, label=TRUE))) + geom_bin2d(binwidth=1) + scale_fill_gradient(low="mistyrose",high="indianred4") + theme_bw()
+```
+
+![](traffic-death-analysis_files/figure-markdown_github/hour_by_dayofweek-1.png)

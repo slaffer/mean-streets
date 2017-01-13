@@ -90,12 +90,21 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(lubridate)
+library(RColorBrewer)
 
 # read data in from traffic-deaths.csv, store in a data fram called "df.traffic"
 # note that we do not create factors from the strings; we may want factors later,
 # but it's often easier to do it ourselves
 
 df.traffic <- read.csv('traffic-deaths.csv',stringsAsFactors = FALSE)
+
+# process victim_type to convert spaces and empty cells to "unknown"
+
+df.traffic$victim_type <- ifelse(df.traffic$victim_type == " ", "unknown", df.traffic$victim_type)
+
+df.traffic$victim_type <- ifelse(df.traffic$victim_type == "", "unknown", df.traffic$victim_type)
+
+df.traffic$victim_type <- factor(df.traffic$victim_type, levels=names(sort(table(df.traffic$victim_type))))
 
 ```
 
@@ -124,11 +133,18 @@ df.fulldate <- subset(df.traffic, !is.na(timestamp))
 
 ## Summarizing each variable separately
 
-## Looking for relationships between variables
-
-
 ```{r accidents_by_month}
 ggplot(df.fulldate, aes(x=month(timestamp, label=TRUE))) + geom_bar()
+```
+
+```{r accidents_by_hour}
+ggplot(df.fulldate, aes(x=factor(hour(timestamp)))) + geom_bar()
+```
+
+## Looking for relationships between variables
+
+```{r victims_by_hour}
+ggplot(df.fulldate, aes(x=factor(hour(timestamp)))) + geom_bar(aes(fill=victim_type)) + scale_fill_manual(values=rev(brewer.pal(5,"Set2")))
 ```
 
 ```{r week_by_hour}

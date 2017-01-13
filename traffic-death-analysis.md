@@ -78,19 +78,12 @@ Note: you can only save files back to a repository you own. RStudio will create 
 8.  After the commit, you still have to "Push" or upload the files up to GitHub. Click the Push button, either in the Commit window or in the normal RStudio window.
 9.  When it asks you to log in, use the username and password of the account you used to fork (or create) the repository
 
-Load the data
--------------
+Load R packages and the data
+----------------------------
 
 ``` r
-df.traffic <- read.csv('traffic-deaths.csv',stringsAsFactors = FALSE)
-
-# create continuous time variable
-
-df.traffic$timestamp <- strptime(paste(df.traffic$date," ",df.traffic$time), "%m/%d/%Y %I:%M %p")
-
-df.traffic$date <- as.Date(df.traffic$date, format = "%m/%d/%Y")
-
-# load packages; note: on your own machine, you might just want to use the tidyverse package to install all at once
+# load packages; note: on your own machine, you might just 
+# want to use the tidyverse package to install all at once
 
 library(dplyr)
 ```
@@ -118,15 +111,71 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(lubridate)
+library(RColorBrewer)
+
+# read data in from traffic-deaths.csv, store in a data fram called "df.traffic"
+# note that we do not create factors from the strings; we may want factors later,
+# but it's often easier to do it ourselves
+
+df.traffic <- read.csv('traffic-deaths.csv',stringsAsFactors = FALSE)
+
+# process victim_type to convert spaces and empty cells to "unknown"
+
+df.traffic$victim_type <- ifelse(df.traffic$victim_type == " ", "unknown", df.traffic$victim_type)
+
+df.traffic$victim_type <- ifelse(df.traffic$victim_type == "", "unknown", df.traffic$victim_type)
+
+df.traffic$victim_type <- factor(df.traffic$victim_type, levels=names(sort(table(df.traffic$victim_type))))
+```
+
+Process/clean the data
+----------------------
+
+``` r
+# create continuous timestamp variable, rather than 
+# two string columns that store date and time separately
+
+# first, paste the two columns together with a space in between, then use 
+# lubridate to read the date and time information
+
+df.traffic$timestamp <- mdy_hm(paste(df.traffic$date," ",df.traffic$time), tz="America/New_York")
+```
+
+    ## Warning: 3 failed to parse.
+
+``` r
+# an alternative way to do this, without using lubridate
+
+#df.traffic$timestamp <- strptime(paste(df.traffic$date," ",df.traffic$time), "%m/%d/%Y %I:%M %p", tz="America/New_York")
+
+# creating a second data frame that removes rows without a full timestamp
 
 df.fulldate <- subset(df.traffic, !is.na(timestamp))
 ```
+
+Summarizing each variable separately
+------------------------------------
 
 ``` r
 ggplot(df.fulldate, aes(x=month(timestamp, label=TRUE))) + geom_bar()
 ```
 
 ![](traffic-death-analysis_files/figure-markdown_github/accidents_by_month-1.png)
+
+``` r
+ggplot(df.fulldate, aes(x=factor(hour(timestamp)))) + geom_bar()
+```
+
+![](traffic-death-analysis_files/figure-markdown_github/accidents_by_hour-1.png)
+
+Looking for relationships between variables
+-------------------------------------------
+
+``` r
+ggplot(df.fulldate, aes(x=factor(hour(timestamp)))) + geom_bar(aes(fill=victim_type)) + scale_fill_manual(values=rev(brewer.pal(5,"Set2")))
+```
+
+![](traffic-death-analysis_files/figure-markdown_github/victims_by_hour-1.png)
 
 ``` r
 ggplot(df.fulldate, aes(x=week(timestamp), y=hour(timestamp))) + geom_bin2d(binwidth=1)
@@ -140,10 +189,24 @@ ggplot(df.fulldate, aes(x=hour(timestamp), y=wday(timestamp, label=TRUE))) + geo
 
 ![](traffic-death-analysis_files/figure-markdown_github/hour_by_dayofweek-1.png)
 
+``` r
+ggplot(df.fulldate, aes(timestamp)) + geom_freqpoly(binwidth=86400)
+```
+
+![](traffic-death-analysis_files/figure-markdown_github/accidents_by_day_a-1.png)
+
+``` r
+ggplot(df.fulldate, aes(yday(timestamp))) + geom_freqpoly(binwidth=1)
+```
+
+![](traffic-death-analysis_files/figure-markdown_github/accidents_by_day_b-1.png)
+
 Resources
 ---------
 
 -   <http://happygitwithr.com/>
 -   LearnR
+-   <https://docs.google.com/spreadsheets/d/1wZhPLMCHKJvwOkP4juclhjFgqIY8fQFMemwKL2c64vk/edit#gid=0>
 -   etc.
--   analysis workflow cheat sheet - just a few simple commands, summary stats?
+-   analysis workflow/data science cheat sheet? just a few simple commands, summary stats?
+-   [http://r4ds.had.co.nz/](R%20for%20Data%20Science,%20Hadley%20Wickham)

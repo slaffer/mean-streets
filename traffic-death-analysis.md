@@ -1,89 +1,16 @@
 Analyzing the NYC Traffic Death Data
 ================
-
-Why use GitHub and R?
----------------------
-
-motivate the workshop
-
-describe GitHub, Docker, RStudio, and RProjects
-
-Philosophy of Version Control
------------------------------
-
-how to decide on when to commit, etc.
-
-Set RStudio up for GitHub
--------------------------
-
-### Configure Git
-
-To send files back to GitHub after you have changed them, you will need to configure RStudio's version of Git with your name and email address.
-
-1.  Go to Tools --&gt; Shell
-2.  Type `git config user.name "Your Name"`, inserting your name
-3.  Hit Enter
-4.  Type `git config user.email "your@emailaddress.com"`, inserting your email
-5.  Hit Enter
-6.  Click Close
-
-### Fork a GitHub repository
-
-If you want to work on a project someone else has already started, you might want to make a copy of that project under your own GitHub account. That process is called "forking".
-
-1.  Find a repository of interest, e.g., <https://github.com/datanews/mean-streets>
-2.  Sign in if not already signed in
-3.  Click on the Fork button at the top right-hand corner
-
-### Find the correct URL GitHub Repository URL
-
-1.  Go to the repository you want (either the original or your forked version, if you are forking)
-2.  Click on the green "Clone or download" button
-3.  Copy the URL from the box that opens
-
-### Connect to the GitHub Repository
-
-1.  Click the project button in the upper right-hand corner of RStudio
-2.  Create a New Project
-3.  If it asks you to save a file, you can hit Save or Don't Save
-4.  Choose "Version Control"
-5.  Choose "Git"
-6.  Paste in the URL from GitHub (see above)
-7.  Create a name for the folder the project will use
-8.  Click "Create Project"
-
-### Create the file where the R code and plots will go
-
-This file was created specially to display well in GitHub. It was created with the following steps.
-
-1.  Go to File --&gt; New File --&gt; R Markdown
-2.  Click on "From Template"
-3.  Scroll down and select "GitHub Document"
-4.  Change title
-5.  Save file with a meaningful name
-
-### Saving back up to GitHub
-
-Before pushing files to GitHub, you should "Knit" the analysis file by clicking the "Knit" button at the top. This will generate a standard markdown file that can be displayed easily by GitHub. This way, people looking at your files on GitHub will see all of your code and charts properly.
-
-Note: you can only save files back to a repository you own. RStudio will create a project based on any repository on GitHub, but you won't necessarily be able to save back to it. If you want to store your files on GitHub, you should always Fork the repository to your account first.
-
-1.  "Knit" the .Rmd file using the Knit button at the top of the window
-2.  Save the .Rmd file and any other files
-3.  In the upper right-hand window, click on "Git"
-4.  Click "Commit" This basically creates a save point for your files -- something you can go back to later, if you need to.
-5.  A new window will try to pop up. If your browser blocks it, authorize the pop-up to appear.
-6.  Check the box next to all of the files in the top left-hand area
-7.  Type a short message in the top right-hand box describing the changes you're making to the project in this particular upload e.g., "adding analysis file", "changing colors in figures"
-8.  After the commit, you still have to "Push" or upload the files up to GitHub. Click the Push button, either in the Commit window or in the normal RStudio window.
-9.  When it asks you to log in, use the username and password of the account you used to fork (or create) the repository
+Angela Zoss
+January 16, 2017
 
 Load R packages and the data
 ----------------------------
 
 ``` r
-# load packages; note: on your own machine, you might just 
-# want to use the tidyverse package to install all at once
+# load packages; note: if your machine doesn't have these 
+# packages installed yet, you can install many of them all at
+# once with install.packages("tidyverse").  See also:
+# https://github.com/tidyverse/tidyverse
 
 library(dplyr)
 ```
@@ -111,32 +38,41 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(lubridate)
+
+# will need to install this separately; not included in tidyverse
 library(RColorBrewer)
 
-# read data in from traffic-deaths.csv, store in a data fram called "df.traffic"
+# read data in from traffic-deaths.csv, store in a data frame called "df.traffic"
 # note that we do not create factors from the strings; we may want factors later,
 # but it's often easier to do it ourselves
 
-df.traffic <- read.csv('traffic-deaths.csv',stringsAsFactors = FALSE)
-
-# process victim_type to convert spaces and empty cells to "unknown"
-
-df.traffic$victim_type <- ifelse(df.traffic$victim_type == " ", "unknown", df.traffic$victim_type)
-
-df.traffic$victim_type <- ifelse(df.traffic$victim_type == "", "unknown", df.traffic$victim_type)
-
-df.traffic$victim_type <- factor(df.traffic$victim_type, levels=names(sort(table(df.traffic$victim_type))))
+df.traffic <- read.csv('traffic-deaths.csv', stringsAsFactors = FALSE)
 ```
 
 Process/clean the data
 ----------------------
 
 ``` r
-# create continuous timestamp variable, rather than 
+# process victim_type to convert spaces and empty cells to "unknown"
+
+df.traffic$victim_type <- ifelse(df.traffic$victim_type == " ", "unknown", df.traffic$victim_type)
+
+df.traffic$victim_type <- ifelse(df.traffic$victim_type == "", "unknown", df.traffic$victim_type)
+
+# turn victim_type into a factor, and order the categories by how many accidents
+# occurred in each category. "table" counts the accidents in each category,
+# "sort" reorders the categories, and "names" takes just the category
+# names and discards the counts
+
+df.traffic$victim_type <- factor(df.traffic$victim_type, levels=names(sort(table(df.traffic$victim_type))))
+
+
+# create a continuous timestamp variable, rather than 
 # two string columns that store date and time separately
 
 # first, paste the two columns together with a space in between, then use 
-# lubridate to read the date and time information
+# lubridate to read the date and time information; this produces an
+# error on rows where either of the columns is empty
 
 df.traffic$timestamp <- mdy_hm(paste(df.traffic$date," ",df.traffic$time), tz="America/New_York")
 ```
@@ -148,65 +84,140 @@ df.traffic$timestamp <- mdy_hm(paste(df.traffic$date," ",df.traffic$time), tz="A
 
 #df.traffic$timestamp <- strptime(paste(df.traffic$date," ",df.traffic$time), "%m/%d/%Y %I:%M %p", tz="America/New_York")
 
-# creating a second data frame that removes rows without a full timestamp
+
+# create a second data frame that removes all rows without a full timestamp;
+# this is what we'll use for the analysis
 
 df.fulldate <- subset(df.traffic, !is.na(timestamp))
 ```
 
-Summarizing each variable separately
-------------------------------------
+Visualizing variable separately for a quick summary
+---------------------------------------------------
+
+### Accidents over time
 
 ``` r
+# In this plot, we want to summarize the data by month. The bar chart
+# will count the number of accidents in each month; we just have to
+# tell it how to find the month in the data.  It's easy to pull parts 
+# of the timestamp out using lubridate functions like month(). 
+# Type ?lubridate for information.
+
 ggplot(df.fulldate, aes(x=month(timestamp, label=TRUE))) + geom_bar()
 ```
 
 ![](traffic-death-analysis_files/figure-markdown_github/accidents_by_month-1.png)
 
 ``` r
+# This is similar to the previous plot, but now we're pulling out the
+# hour of the timestamp.  What do you think factor() is doing here?
+# Tip: try the same plot without the factor() command.
+
 ggplot(df.fulldate, aes(x=factor(hour(timestamp)))) + geom_bar()
 ```
 
 ![](traffic-death-analysis_files/figure-markdown_github/accidents_by_hour-1.png)
 
+``` r
+# Try on your own: plot the number of accidents on different days of the week.
+```
+
+### Categories of victims
+
+``` r
+# In previous plots, we used "geom_bar".  This chart is using "geom_histogram".
+# Why might that be?
+
+ggplot(df.fulldate, aes(x=age)) + geom_histogram(bins=25)
+```
+
+    ## Warning: Removed 60 rows containing non-finite values (stat_bin).
+
+![](traffic-death-analysis_files/figure-markdown_github/age_distribution-1.png)
+
+``` r
+# Here is the basic framework for a pie chart, but it could use a lot of help!  
+# For starters, try:
+#    - fixing the categories to change blank cells to "Unknown"
+#    - combine "M" and "m"
+#    - specify the order of the wedges in pie chart
+
+ggplot(df.fulldate, aes(x=factor(1),fill=gender)) + geom_bar(position="stack") + coord_polar(theta="y") 
+```
+
+![](traffic-death-analysis_files/figure-markdown_github/victims_by_gender-1.png)
+
 Looking for relationships between variables
 -------------------------------------------
 
 ``` r
+# This is the same plot by hour we had above, but now the bars are colored
+# according to the victim type.  The final line of the plot overrides the 
+# default colors using part of a color palette from the RColorBrewer package.
+
 ggplot(df.fulldate, aes(x=factor(hour(timestamp)))) + geom_bar(aes(fill=victim_type)) + scale_fill_manual(values=rev(brewer.pal(5,"Set2")))
 ```
 
 ![](traffic-death-analysis_files/figure-markdown_github/victims_by_hour-1.png)
 
 ``` r
-ggplot(df.fulldate, aes(x=week(timestamp), y=hour(timestamp))) + geom_bin2d(binwidth=1)
-```
+# This plot is often called a "heatmap". It compares the day of the week to the 
+# hour of the day to see if there are cycles of accidents.  In ggplot2, heatmaps
+# are called bin2d, or a chart with two dimensional binning.  This plot also
+# using "theme_bw()" to apply a black and white background theme, instead of the
+# grey background with white gridlines.
 
-![](traffic-death-analysis_files/figure-markdown_github/week_by_hour-1.png)
-
-``` r
-ggplot(df.fulldate, aes(x=hour(timestamp), y=wday(timestamp, label=TRUE))) + geom_bin2d(binwidth=1) + scale_fill_gradient(low="mistyrose",high="indianred4") + theme_bw()
+ggplot(df.fulldate, aes(x=hour(timestamp), y=wday(timestamp, label=TRUE))) + 
+  geom_bin2d(binwidth=1) + 
+  scale_fill_gradient(low="mistyrose",high="indianred4") + 
+  theme_bw()
 ```
 
 ![](traffic-death-analysis_files/figure-markdown_github/hour_by_dayofweek-1.png)
 
 ``` r
+# What about a line chart that shows the number of accidents each day for the 
+# entire year?  Well, it's a bit messy, but here's one way you might make that.
+
 ggplot(df.fulldate, aes(timestamp)) + geom_freqpoly(binwidth=86400)
 ```
 
 ![](traffic-death-analysis_files/figure-markdown_github/accidents_by_day_a-1.png)
 
 ``` r
+# Here's another way to make pretty much the same chart.  What are the differences?
+
 ggplot(df.fulldate, aes(yday(timestamp))) + geom_freqpoly(binwidth=1)
 ```
 
 ![](traffic-death-analysis_files/figure-markdown_github/accidents_by_day_b-1.png)
 
+``` r
+# Now, what if we wanted to try to predict whether charges would be filed?
+# This code does a few things:
+#    - limit the data just to rows where "charges" is not empty
+#    - create one bar for adult victims, one for child victims
+#    - split the bar into two categories -- one where charges is "None", and 
+#      another that includes everything else
+#    - have the bars measure percentage instead of count
+
+ggplot(df.fulldate[df.fulldate$charges != "",], aes(x=child_adult,fill=charges!="None")) + geom_bar(position="fill")
+```
+
+![](traffic-death-analysis_files/figure-markdown_github/charges_by_victim-1.png)
+
+Try on your own
+---------------
+
+-   The charts need a **lot** of help with axis labels, colors, etc.
+    New to ggplot2? Check out the cheatsheet under Help --&gt; Cheatsheets
+-   What other variables need cleaning?
+-   What other variables could be summarized or compared?
+
 Resources
 ---------
 
--   <http://happygitwithr.com/>
--   LearnR
--   <https://docs.google.com/spreadsheets/d/1wZhPLMCHKJvwOkP4juclhjFgqIY8fQFMemwKL2c64vk/edit#gid=0>
--   etc.
--   analysis workflow/data science cheat sheet? just a few simple commands, summary stats?
--   [http://r4ds.had.co.nz/](R%20for%20Data%20Science,%20Hadley%20Wickham)
+-   [R for Data Science, Hadley Wickham](http://r4ds.had.co.nz/)
+-   [Happy Git and GitHub for the useR](http://happygitwithr.com/)
+-   [Duke University Libraries' LearnR group](https://github.com/dukevis/learnr/wiki)
+-   [Data is Plural Datasets - regularly updated](https://docs.google.com/spreadsheets/d/1wZhPLMCHKJvwOkP4juclhjFgqIY8fQFMemwKL2c64vk/edit#gid=0)

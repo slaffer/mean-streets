@@ -122,6 +122,14 @@ ggplot(df.fulldate, aes(x=factor(hour(timestamp)))) + geom_bar()
 # Try on your own: plot the number of accidents on different days of the week.
 ```
 
+------------------------------------------------------------------------
+
+**Save a new version!**
+
+Head back to the [README file](https://github.com/dukevis/mean-streets) for instructions on how to push a new version to your GitHub repository straight from RStudio.
+
+------------------------------------------------------------------------
+
 ### Categories of victims
 
 ``` r
@@ -221,3 +229,4 @@ Resources
 -   [Happy Git and GitHub for the useR](http://happygitwithr.com/)
 -   [Duke University Libraries' LearnR group](https://github.com/dukevis/learnr/wiki)
 -   [Data is Plural Datasets - regularly updated](https://docs.google.com/spreadsheets/d/1wZhPLMCHKJvwOkP4juclhjFgqIY8fQFMemwKL2c64vk/edit#gid=0)
+-   [Pro Git Book](https://git-scm.com/book/en/v2)

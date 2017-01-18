@@ -230,3 +230,4 @@ Resources
 -   [Duke University Libraries' LearnR group](https://github.com/dukevis/learnr/wiki)
 -   [Data is Plural Datasets - regularly updated](https://docs.google.com/spreadsheets/d/1wZhPLMCHKJvwOkP4juclhjFgqIY8fQFMemwKL2c64vk/edit#gid=0)
 -   [Pro Git Book](https://git-scm.com/book/en/v2)
+-   [Introduction to ggplot2](http://rpubs.com/amz25/TVG-ggplot2)

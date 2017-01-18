@@ -2,7 +2,7 @@
 
 ## Why use GitHub and R?
 
-GitHub is a website where you can share data and code publicly or within a small group of collaborators.  Sharing data projects on GitHub can be a great back-up solution and can also help you build a portfolio of data projects.  
+[GitHub](https://github.com/) is a website where you can share data and code publicly or within a small group of collaborators.  Sharing data projects on GitHub can be a great back-up solution and can also help you build a portfolio of data projects.  
 
 "Stealing" and improving projects that have been shared on GitHub is also a great opportunity to contribute to a larger effort or to learn new skills from more experienced coders and analysts.  
 
@@ -34,22 +34,40 @@ If you want to work on a project someone else has already started, you might wan
 2. Sign into GitHub if not already signed in
 3. Click on the Fork button at the top right-hand corner
 
+    <a href="screenshots/fork.png"><img src="screenshots/fork.png" width="500" alt="The GitHub Fork button" /></a>
+
 ### Find the correct URL GitHub Repository URL
 
 1. Go to the repository you want (either the original or your forked version, if you are forking)
 2. Click on the green "Clone or download" button
 3. Copy the URL from the box that opens
 
-### Connect to the GitHub Repository
+    <a href="screenshots/url.png"><img src="screenshots/url.png" width="500" alt="The repository URL on GitHub" /></a>
 
-1. Click the project button in the upper right-hand corner of RStudio
-2. Create a New Project
-3. If it asks you to save a file, you can hit Save or Don't Save
-4. Choose "Version Control"
-5. Choose "Git"
-6. Paste in the URL from GitHub (see above)
-7. Create a name for the folder the project will use
-8. Click "Create Project"
+### Connect RStudio to the GitHub Repository
+
+1. Open Duke's RStudio Docker container by signing in at <https://vm-manage.oit.duke.edu>, clicking on Docker at the top, and then selecting the RStudio container.
+2. Click the project button in the upper right-hand corner of RStudio
+3. Create a New Project
+
+    <a href="screenshots/new_project.png"><img src="screenshots/new_project.png" width="500" alt="The Project button in RStudio" /></a>
+
+4. If it asks you to save a file, you can hit Save or Don't Save
+5. Choose "Version Control"
+
+    <a href="screenshots/version_control.png"><img src="screenshots/version_control.png" width="500" alt="The version control project option" /></a>
+
+6. Choose "Git"
+
+    <a href="screenshots/git_project.png"><img src="screenshots/git_project.png" width="500" alt="The Git option for version control projects" /></a>
+
+7. Paste in the URL from GitHub (see above)
+8. Create a name for the folder the project will use
+9. Click "Create Project"
+
+    <a href="screenshots/git_options.png"><img src="screenshots/git_options.png" width="500" alt="Filling in the Git project options in RStudio" /></a>
+
+
 
 ## Code files, GitHub style
 
@@ -95,6 +113,16 @@ Reminder: you can only save files back to a repository you own.  RStudio will cr
 
 8. After the commit, you still have to "Push" or upload the files up to GitHub. Click the Push button, either in the Commit window or in the normal RStudio window.
 9. When it asks you to log in, use the username and password of the account you used to fork (or create) the repository
+
+## Resources
+
+* [R for Data Science, Hadley Wickham](http://r4ds.had.co.nz/)
+* [Happy Git and GitHub for the useR](http://happygitwithr.com/)
+* [Duke University Libraries' LearnR group](https://github.com/dukevis/learnr/wiki)
+* [Data is Plural Datasets - regularly updated](https://docs.google.com/spreadsheets/d/1wZhPLMCHKJvwOkP4juclhjFgqIY8fQFMemwKL2c64vk/edit#gid=0)
+* [Pro Git Book](https://git-scm.com/book/en/v2)
+* [Introduction to ggplot2](http://rpubs.com/amz25/TVG-ggplot2)
+
 
 * * *
 
